@@ -4,28 +4,24 @@ import socket
 import time
 import threading
 
-def emitSignal(signal): #signal = keystroke to server
-    s.send(signal)
-    s.close()
-
 class joystickSocket():
-    self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
     def __init__(self, timeout = 10, ip = "192.168.7.1", porta = 30000):
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.s.settimeout(10)
         self.s.connect((ip, porta))
 
     def emitSignal(self, signal): #signal = keystroke to server
         self.s.send(signal)
-    
+
     def __del__(self):
         self.s.close()
 
-lock = threading.Lock()
-
-class pot(Thread.threading):
-    AIN = "AIN0"
-    def __init__(joy_socket = joystickSocket()):
+class Pot(threading.Thread):
+    def __init__(self, joy_socket = joystickSocket(), AIN = "AIN0"):
+        threading.Thread.__init__(self)
+        self.joy_socket = joy_socket
+        self.AIN = AIN
+        return
 
     def run(self):
         while True:
@@ -33,43 +29,48 @@ class pot(Thread.threading):
             if (p < 0.3):
                 self.joy_socket.emitSignal('A')
             elif(p > 0.7):
-                lock.acquire()
                 self.joy_socket.emitSignal('D')
-                lock.release()
+            time.sleep(0.1)
 
 
-class luz(Thread.threading):
+class Luz(threading.Thread):
+
+    def __init__(self, joy_socket = joystickSocket(), AIN = "AIN1"):
+        threading.Thread.__init__(self)
+        self.joy_socket = joy_socket
+        self.AIN = AIN
+        return
 
     def run(self):
+        l = ADC.read(self.AIN)
+        while True:
+            l2 = ADC.read(self.AIN)
+            if(l2  > (l + 0.01)):
+                self.joy_socket.emitSignal('E')
+            l = l2
+            time.sleep(0.1)
 
 
-class bot(Thread.threading):
+class Bot(threading.Thread):
+
+    def __init__(self, joy_socket = joystickSocket(), PIO = "P9_27"):
+        threading.Thread.__init__(self)
+        self.joy_socket = joy_socket
+        self.PIO = PIO
+        return
 
     def run(self):
-
-
-def luz():
-    l = ADC.read("AIN1")
-    while True:
-        l2 = ADC.read("AIN1")
-        if(l2  > (l + 0.01)):
-            emitSignal('E')
-        l = l2
-
-def bot():
-    GPIO.setup("P9_27", GPIO.IN)
-    while True:
-        b = GPIO.input("P9_27")
-        if b:
-            emitSignal('B')
-
-
-
+        GPIO.setup(self.PIO, GPIO.IN)
+        while True:
+            if GPIO.input(self.PIO):
+                self.joy_socket.emitSignal('P')
+            time.sleep(0.1)
+            
 if __name__ == '__main__':
     ADC.setup()
-    tpot = threading.Thread(target= pot)
-    tluz = threading.Thread(target= luz)
-    tbot = threading.Thread(target= bot)
-    tpot.start()
-    tluz.start()
-    tbot.start()
+    pot = Pot()
+    luz = Luz()
+    bot = Bot()
+    pot.start()
+    luz.start()
+    bot.start()
