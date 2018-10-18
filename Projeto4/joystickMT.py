@@ -50,7 +50,6 @@ class Luz(threading.Thread):
             l = l2
             time.sleep(0.1)
 
-
 class Bot(threading.Thread):
 
     def __init__(self, joy_socket = joystickSocket(), PIO = "P9_27"):
@@ -65,7 +64,7 @@ class Bot(threading.Thread):
             if GPIO.input(self.PIO):
                 self.joy_socket.emitSignal('P')
             time.sleep(0.1)
-            
+
 if __name__ == '__main__':
     ADC.setup()
     pot = Pot()
