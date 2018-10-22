@@ -1,0 +1,3 @@
+
+class food():
+    pass

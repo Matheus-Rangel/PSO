@@ -21,8 +21,7 @@ done = False
 clock = pygame.time.Clock()
 
 while not done:
-    # This limits the while loop to a max of 10 times per second.
-    # Leave this out and we will use all CPU we can.
+
     clock.tick(60)
     player.move()
     for event in pygame.event.get(): # User did something
@@ -39,20 +38,14 @@ while not done:
             if event.key == pygame.K_d:
                 player.change_direction(direction = 'e')
 
-    # All drawing code happens after the for loop and but
-    # inside the main while done==False loop.
-
     # Clear the screen and set the screen background
     screen.fill(BLACK)
 
-    # Draw on the screen a GREEN line from (0,0) to (50.75)
-    # 5 pixels wide.
+    #Draw snakes
     for i in range(len(player.joints) - 1):
         pygame.draw.line(screen, player.color, player.joints[i], player.joints[i + 1], 2)
     pygame.draw.line(screen, player.color, player.joints[-1], player.head, 2)
 
-
     pygame.display.update()
 
-# Be IDLE friendly
 pygame.quit()

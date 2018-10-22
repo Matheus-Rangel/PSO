@@ -1,10 +1,11 @@
+from json import JSONEncoder
 
-class snake():
+class snake(JSONEncoder):
     def __init__(self, pos_x, pos_y, color, direction):
         """
         Size of the snake
         """
-        self.size = 1
+        self.size = 500
 
         """
         List of snake joints
@@ -15,13 +16,13 @@ class snake():
         Position of snake head
         """
         if (direction == 'n'):
-            self.head = [pos_x, pos_y - 50]
+            self.head = [pos_x, pos_y - self.size]
         elif (direction == 's'):
-            self.head = [pos_x, pos_y + 50]
+            self.head = [pos_x, pos_y + self.size]
         elif (direction == 'e'):
-            self.head = [pos_x + 50, pos_y]
+            self.head = [pos_x + self.size, pos_y]
         elif (direction == 'w'):
-            self.head = [pos_x - 50, pos_y]
+            self.head = [pos_x - self.size, pos_y]
 
         """
         rgb Color of the snake
@@ -61,6 +62,11 @@ class snake():
         self.direction = direction
         self.joints.append(list(self.head))
         return
+
+    #Create a dictionary to serialize has json
+    def default(self):
+        dict = {'joints':self.joints, 'head':self.head, 'color':self.color, 'direction':self.direction, 'size':self.size}
+        return dict
 
     def __create_next(self):
         if (self.direction == 'n'):
