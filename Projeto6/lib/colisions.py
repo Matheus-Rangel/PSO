@@ -1,23 +1,26 @@
-def dot_lines_colision(dot, lines):
-    """
-    Verificar se um ponto está colidindo com alguma linha da lista de linhas
-    """
-    for line in lines:
-        if dot_line_colision(dot, line):
-            return True
-    return False
+from math import sqrt, isclose
 
-def dot_line_colision(dot, line):
+def distance(a,b):
     """
-    Verificar se um ponto está colidindo com a linha
+    Distancia entre os pontos a e b
     """
-    
-def bound_colide(dot, sizex, sizey):
-    """
-    Verificar se o ponto ainda está nos limites da tela
-    """
+    return sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
 
-def line_intersection(line_1, line_2):
+def is_between(a,c,b):
     """
-    Verificar a intersecao entre as linhas
+    Verifica se o ponto c está entre os pontos a e b.
     """
+    r = isclose(distance(a,c) + distance(c,b), distance(a,b))
+    print(r)
+    return r
+
+def is_out(dot, sizex, sizey):
+    """
+    Verifica se o ponto ainda está nos limites da tela
+    """
+    if(dot[0] < 0 or dot[1] < 0):
+        return True
+    elif(dot[0] > sizex or dot [1] > sizey):
+        return True
+    else:
+        return False

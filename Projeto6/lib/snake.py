@@ -5,7 +5,17 @@ class snake(JSONEncoder):
         """
         Size of the snake
         """
-        self.size = 500
+        self.size = 36
+
+        """
+        Snake speed
+        """
+        self.speed = 4
+
+        """
+        Amount of food stocked
+        """
+        self.reserve = 0
 
         """
         List of snake joints
@@ -38,15 +48,19 @@ class snake(JSONEncoder):
         """
         Update snake position
         """
-        self.__delete_last()
-        self.__create_next()
+        if (self.reserve > 0):
+            self.__create_next()
+            self.reserve -= self.speed
+            self.size += self.speed
+        else:
+            self.__create_next()
+            self.__delete_last()
 
     def die(self):
         pass
 
     def eat(self):
-        self.size += 1
-        self.create_next()
+        self.reserve += 18
 
     def change_direction(self, direction):
         if (self.direction == direction):
@@ -70,35 +84,36 @@ class snake(JSONEncoder):
 
     def __create_next(self):
         if (self.direction == 'n'):
-            self.head[1] -= 1
+            self.head[1] -= self.speed
         elif (self.direction == 's'):
-            self.head[1] += 1
+            self.head[1] += self.speed
         elif (self.direction == 'e'):
-            self.head[0] += 1
+            self.head[0] += self.speed
         elif (self.direction == 'w'):
-            self.head[0] -= 1
+            self.head[0] -= self.speed
 
     def __delete_last(self):
         tail = self.joints[0]
         if (len(self.joints) == 1):
             if (self.direction == 'n'):
-                tail[1] -= 1
+                tail[1] -= self.speed
             elif (self.direction == 's'):
-                tail[1] += 1
+                tail[1] += self.speed
             elif (self.direction == 'e'):
-                tail[0] += 1
+                tail[0] += self.speed
             elif (self.direction == 'w'):
-                tail[0] -= 1
+                tail[0] -= self.speed
         else:
             joint = self.joints[1]
+            print("joint: {}, tail:{}".format(joint, tail))
             if (joint[0] > tail[0]):
-                tail[0] += 1
+                tail[0] += self.speed
             elif (joint[0] < tail[0]):
-                tail[0] -= 1
+                tail[0] -= self.speed
             elif (joint[1] > tail[1]):
-                tail[1] += 1
+                tail[1] += self.speed
             elif (joint[1] < tail[1]):
-                tail[1] -= 1
+                tail[1] -= self.speed
             else:
                 self.joints.remove(tail)
                 self.__delete_last()
