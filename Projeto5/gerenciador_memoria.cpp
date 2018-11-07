@@ -1,5 +1,4 @@
 #include <string>	//string
-#include <stdlib.h>	//system
 #include <iostream>	//cout
 #include <memory>	//shared_ptr
 #include <sstream>	//stringstream
@@ -37,7 +36,8 @@ int main(){
 	cout << "Swap Livre: "<< swapLivre << endl;
 
 	string usuario = exec("users");
-	string comando = "ps -f -u " + usuario + " | awk '{print $2}'";
+	string cmd = "ps -f -u "+ usuario;
+	string comando = cmd +" | grep -v '"+ cmd +"' | grep -v 'grep' | grep -v 'awk' | awk '{print $2}'";
 	string saida = exec(comando.c_str());
 
 	stringstream ss;
@@ -45,16 +45,18 @@ int main(){
 	string pid;
 	ss >> pid; //Descartando a linha de título PID
 
-	/*cout << endl << "Falta de página por processo:" << endl;
-	cout << "PID\tMINFL\tMAJFL" << endl;
+	cout << endl << "Falta de página por processo:" << endl;
+	ss >> pid;
+	comando = "ps -o user,pid,min_flt,maj_flt " + pid;
+	saida = exec(comando.c_str());
+	cout << saida << endl; //Exibindo a primeira linha com títulos PID, MINFL, MAJFL
+
 	while(!ss.eof()){
 		ss >> pid;
-		//comando = "ps -o pid,min_flt,maj_flt " + pid + " | grep -n ^ | grep ^2: | awk '{print $2 FS $3 FS $4}'";
-		comando = "ps -o pid,min_flt,maj_flt " + pid + " | grep -n ^ | grep ^2:";
-		//comando = "ps -o pid,min_flt,maj_flt " + pid;
+		comando = "ps -o user,pid,min_flt,maj_flt " + pid + " | grep -n ^ | grep ^2:";
 		saida = exec(comando.c_str());
-		cout << saida << endl;
-		//cout << comando << endl;
-	}*/
-	//sleep
+		cout << saida.erase(0,2) << endl;
+	}
+	
+	return 0;
 }
