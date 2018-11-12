@@ -58,6 +58,45 @@ void memoriaLivre(){
 	gerarGrafico(pct_usado);
 }
 
+stringstream processosPorUsuario(){
+
+	//Obtem o usuario
+	string usuario = exec("users");
+	stringstream s1 (usuario);
+	s1 >> usuario;
+
+	//Pega os processos de tal usuario
+	string cmd = "ps -f -u "+ usuario;
+	string comando = cmd +" | grep -v '"+ cmd +"' | grep -v 'grep' | grep -v 'awk' | awk '{print $2}'";
+	string saida = exec(comando.c_str());
+
+	stringstream ss (saida);
+	string pid;
+	ss >> pid; //Descartando a linha de título PID
+
+	return ss;
+}
+
+void informacoesPorProcessos(){
+	stringstream ss = processosPorUsuario();
+
+	string pid;
+	ss >> pid;
+	
+	cout << endl << "Falta de página por processo:" << endl;
+	string comando = "ps -o user,pid,min_flt,maj_flt,%mem " + pid;
+	string saida = exec(comando.c_str());
+	cout << saida << endl; //Exibindo a primeira linha com títulos PID, MINFL, MAJFL
+
+	while(!ss.eof()){
+		ss >> pid;
+		comando = "ps -o user,pid,min_flt,maj_flt,%mem " + pid + " | grep -n ^ | grep ^2:";
+		saida = exec(comando.c_str());
+		cout << saida.erase(0,2) << endl;
+	}
+
+}
+
 int main(){
 
 	memoriaTotal();
@@ -65,32 +104,8 @@ int main(){
 	memoriaCache();
 
 	memoriaLivre();
-
-	string usuario = exec("users");
-	stringstream s1 (usuario);
-	s1 >> usuario;
-
-	string cmd = "ps -f -u "+ usuario;
-	string comando = cmd +" | grep -v '"+ cmd +"' | grep -v 'grep' | grep -v 'awk' | awk '{print $2}'";
-	string saida = exec(comando.c_str());
-
-	stringstream ss;
-	ss.str (saida);
-	string pid;
-	ss >> pid; //Descartando a linha de título PID
-
-	cout << endl << "Falta de página por processo:" << endl;
-	ss >> pid;
-	comando = "ps -o user,pid,min_flt,maj_flt " + pid;
-	saida = exec(comando.c_str());
-	cout << saida << endl; //Exibindo a primeira linha com títulos PID, MINFL, MAJFL
-
-	while(!ss.eof()){
-		ss >> pid;
-		comando = "ps -o user,pid,min_flt,maj_flt " + pid + " | grep -n ^ | grep ^2:";
-		saida = exec(comando.c_str());
-		cout << saida.erase(0,2) << endl;
-	}
 	
+	informacoesPorProcessos();
+
 	return 0;
 }
