@@ -26,47 +26,67 @@ void gerarGrafico(float pct_usado){
     cout << " " << pct_usado << "% usados" << endl;
 }
 
-void funcaoGenerica(string comando, string memoria){
-	string saida = exec(comando.c_str());
-   	stringstream s1 (saida);
-   	string total, usado;
+void memoriaTotal(){
+	string memoriaTotal = exec("cat /proc/meminfo | grep -n ^ | grep ^1: | awk '{print $2}'");
+	string memoriaLivre = exec("cat /proc/meminfo | grep -n ^ | grep ^2: | awk '{print $2}'");
+	cout << endl << "Memória Total: "<< memoriaTotal << " kB" << endl;
 
-   	s1 >> total;
-   	s1 >> usado;
+	float pct_usado;
+	if(stoi(memoriaTotal) != 0)
+		pct_usado = (float) (stoi(memoriaTotal) - stoi(memoriaLivre)) / stoi(memoriaTotal) * 100;
+	else
+		pct_usado = 0;
+	gerarGrafico(pct_usado);
+}
 
-	cout << endl << memoria << total << " kB" << endl;
+void memoriaCache(){
+	string cache = exec("cat /proc/meminfo | grep -n ^ | grep ^5: | awk '{print $2 FS $3}'");
+	cout << endl << "Memória Cache: "<< cache << endl;
+}
 
-	float pct_usado = (float) stoi(usado) / stoi(total) * 100;
+void memoriaLivre(){
+	string swapTotal = exec("cat /proc/meminfo | grep -n ^ | grep ^15: | awk '{print $2}'");
+	string swapLivre = exec("cat /proc/meminfo | grep -n ^ | grep ^16: | awk '{print $2}'");
+	cout << endl << "Swap Total: "<< swapTotal << " kB" << endl;
+
+	float pct_usado;
+	if(stoi(swapTotal) != 0)
+		pct_usado = (float) (stoi(swapTotal) - stoi(swapLivre)) / stoi(swapTotal) * 100;
+	else
+		pct_usado = 0;
 
 	gerarGrafico(pct_usado);
 }
 
 int main(){
 
-	funcaoGenerica("free | grep -n ^ | grep ^2 | awk '{print $2 FS $3}'", "Memória Principal: ");
+	memoriaTotal();
 
-	string cache = exec("free | grep -n ^ | grep ^2 | awk '{print $6}'");
-   	cout << endl << "Memória Cache: "<< cache << " kB" << endl;
+	memoriaCache();
 
-   	funcaoGenerica("free | grep -n ^ | grep ^3 | awk '{print $2 FS $3}'", "Swap: ");
+	memoriaLivre();
 
 	string usuario = exec("users");
+	stringstream s1 (usuario);
+	s1 >> usuario;
+
 	string cmd = "ps -f -u "+ usuario;
 	string comando = cmd +" | grep -v '"+ cmd +"' | grep -v 'grep' | grep -v 'awk' | awk '{print $2}'";
 	string saida = exec(comando.c_str());
 
-	stringstream s2 (saida);
+	stringstream ss;
+	ss.str (saida);
 	string pid;
-	s2 >> pid; //Descartando a linha de título PID
+	ss >> pid; //Descartando a linha de título PID
 
 	cout << endl << "Falta de página por processo:" << endl;
-	s2 >> pid;
+	ss >> pid;
 	comando = "ps -o user,pid,min_flt,maj_flt " + pid;
 	saida = exec(comando.c_str());
 	cout << saida << endl; //Exibindo a primeira linha com títulos PID, MINFL, MAJFL
 
-	while(!s2.eof()){
-		s2 >> pid;
+	while(!ss.eof()){
+		ss >> pid;
 		comando = "ps -o user,pid,min_flt,maj_flt " + pid + " | grep -n ^ | grep ^2:";
 		saida = exec(comando.c_str());
 		cout << saida.erase(0,2) << endl;
