@@ -44,7 +44,7 @@ void memoriaCache(){
 	cout << endl << "Memória Cache: "<< cache << endl;
 }
 
-void memoriaLivre(){
+void swap(){
 	string swapTotal = exec("cat /proc/meminfo | grep -n ^ | grep ^15: | awk '{print $2}'");
 	string swapLivre = exec("cat /proc/meminfo | grep -n ^ | grep ^16: | awk '{print $2}'");
 	cout << endl << "Swap Total: "<< swapTotal << " kB" << endl;
@@ -58,7 +58,7 @@ void memoriaLivre(){
 	gerarGrafico(pct_usado);
 }
 
-stringstream processosPorUsuario(){
+string processosPorUsuario(){
 
 	//Obtem o usuario
 	string usuario = exec("users");
@@ -70,19 +70,16 @@ stringstream processosPorUsuario(){
 	string comando = cmd +" | grep -v '"+ cmd +"' | grep -v 'grep' | grep -v 'awk' | awk '{print $2}'";
 	string saida = exec(comando.c_str());
 
-	stringstream ss (saida);
-	string pid;
-	ss >> pid; //Descartando a linha de título PID
-
-	return ss;
+	return saida;
 }
 
 void informacoesPorProcessos(){
-	stringstream ss = processosPorUsuario();
+	stringstream ss (processosPorUsuario());
 
 	string pid;
 	ss >> pid;
-	
+	ss >> pid; 
+
 	cout << endl << "Falta de página por processo:" << endl;
 	string comando = "ps -o user,pid,min_flt,maj_flt,%mem " + pid;
 	string saida = exec(comando.c_str());
@@ -103,7 +100,7 @@ int main(){
 
 	memoriaCache();
 
-	memoriaLivre();
+	swap();
 	
 	informacoesPorProcessos();
 
