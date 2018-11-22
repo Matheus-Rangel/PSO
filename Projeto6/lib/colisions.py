@@ -11,7 +11,6 @@ def is_between(a,c,b):
     Verifica se o ponto c está entre os pontos a e b.
     """
     r = isclose(distance(a,c) + distance(c,b), distance(a,b))
-    print(r)
     return r
 
 def is_out(dot, sizex, sizey):
