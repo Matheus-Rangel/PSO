@@ -15,7 +15,7 @@ def main():
     server_port = int(input("Server Port: "))
     client = Client(server_ip, server_port)
     dados = client.connect()
-    if dados == None:
+    if dados is None:
         print('Falha a se conectar com o servidor. Verifique as configurações')
         return
     # Initialize the game engine
@@ -32,6 +32,9 @@ def main():
     player_direction = dados['you']['snake']['direction']
     while not DONE:
         dados = client.send(player_id, player_direction)
+        if dados is None:
+            print('Falha a se conectar com o servidor. Verifique as configurações')
+            DONE = True
         CLOCK.tick(dados['tick'])
         for event in pygame.event.get(): # User did something
             if event.type == pygame.QUIT: # If user clicked close
