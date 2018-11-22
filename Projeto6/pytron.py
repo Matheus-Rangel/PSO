@@ -15,6 +15,9 @@ def main():
     server_port = int(input("Server Port: "))
     client = Client(server_ip, server_port)
     dados = client.connect()
+    if dados == None:
+        print('Falha a se conectar com o servidor. Verifique as configurações')
+        return
     # Initialize the game engine
     pygame.init()
     # Define the colors we will use in RGB format
