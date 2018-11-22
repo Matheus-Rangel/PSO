@@ -44,7 +44,7 @@ void memoriaCache(){
 	cout << endl << "Memória Cache: "<< cache << endl;
 }
 
-void memoriaLivre(){
+void swap(){
 	string swapTotal = exec("cat /proc/meminfo | grep -n ^ | grep ^15: | awk '{print $2}'");
 	string swapLivre = exec("cat /proc/meminfo | grep -n ^ | grep ^16: | awk '{print $2}'");
 	cout << endl << "Swap Total: "<< swapTotal << " kB" << endl;
@@ -58,39 +58,51 @@ void memoriaLivre(){
 	gerarGrafico(pct_usado);
 }
 
+string processosPorUsuario(){
+
+	//Obtem o usuario
+	string usuario = exec("users");
+	stringstream s1 (usuario);
+	s1 >> usuario;
+
+	//Pega os processos de tal usuario
+	string cmd = "ps -f -u "+ usuario;
+	string comando = cmd +" | grep -v '"+ cmd +"' | grep -v 'grep' | grep -v 'awk' | awk '{print $2}'";
+	string saida = exec(comando.c_str());
+
+	return saida;
+}
+
+void informacoesPorProcessos(){
+	stringstream ss (processosPorUsuario());
+
+	string pid;
+	ss >> pid;
+	ss >> pid; 
+
+	cout << endl << "Falta de página por processo:" << endl;
+	string comando = "ps -o user,pid,min_flt,maj_flt,%mem " + pid;
+	string saida = exec(comando.c_str());
+	cout << saida << endl; //Exibindo a primeira linha com títulos PID, MINFL, MAJFL
+
+	while(!ss.eof()){
+		ss >> pid;
+		comando = "ps -o user,pid,min_flt,maj_flt,%mem " + pid + " | grep -n ^ | grep ^2:";
+		saida = exec(comando.c_str());
+		cout << saida.erase(0,2) << endl;
+	}
+
+}
+
 int main(){
 
 	memoriaTotal();
 
 	memoriaCache();
 
-	memoriaLivre();
-
-	string usuario = exec("users");
-	stringstream s1 (usuario);
-	s1 >> usuario;
-
-	string cmd = "ps -f -u "+ usuario;
-	string comando = cmd +" | grep -v '"+ cmd +"' | grep -v 'grep' | grep -v 'awk' | awk '{print $2}'";
-	string saida = exec(comando.c_str());
-
-	stringstream ss;
-	ss.str (saida);
-	string pid;
-	ss >> pid; //Descartando a linha de título PID
-
-	cout << endl << "Falta de página por processo:" << endl;
-	ss >> pid;
-	comando = "ps -o user,pid,min_flt,maj_flt " + pid;
-	saida = exec(comando.c_str());
-	cout << saida << endl; //Exibindo a primeira linha com títulos PID, MINFL, MAJFL
-
-	while(!ss.eof()){
-		ss >> pid;
-		comando = "ps -o user,pid,min_flt,maj_flt " + pid + " | grep -n ^ | grep ^2:";
-		saida = exec(comando.c_str());
-		cout << saida.erase(0,2) << endl;
-	}
+	swap();
 	
+	informacoesPorProcessos();
+
 	return 0;
 }
