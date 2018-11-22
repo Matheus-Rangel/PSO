@@ -16,6 +16,7 @@ class Client():
             response = json.loads(data)
         except timeout:
             print("Server Time Out")
+            return None
         return response
 
     def send(self, ident, direction):
