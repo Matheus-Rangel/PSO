@@ -19,7 +19,7 @@ def is_out(dot, sizex, sizey):
     """
     if(dot[0] < 0 or dot[1] < 0):
         return True
-    elif(dot[0] > sizex or dot [1] > sizey):
+    elif(dot[0] > sizex or dot[1] > sizey):
         return True
     else:
         return False
