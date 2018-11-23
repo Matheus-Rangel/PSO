@@ -13,7 +13,7 @@ class Client():
             data = {"id":0}
             self.socket.sendto(json.dumps(data).encode('utf-8'), self.server_address)
             data = self.socket.recv(4096)
-            response = json.loads(data)
+            response = json.loads(data.decode('utf-8'))
         except timeout:
             print("Server Time Out")
             return None
@@ -24,9 +24,10 @@ class Client():
             data = {"id":ident, "direction":direction}
             self.socket.sendto(json.dumps(data).encode('utf-8'), self.server_address)
             data = self.socket.recv(4096)
-            response = json.loads(data)
+            response = json.loads(data.decode('utf-8'))
         except timeout:
             print("Server Time Out")
+            return None
         return response
 
 def __main():

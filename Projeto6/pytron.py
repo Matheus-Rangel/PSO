@@ -2,7 +2,7 @@
 
 # Import a library of functions called 'pygame'
 import pygame
-
+from lib.random import random_boleam, random_snake_direction
 from lib.food import Food
 from lib.colisions import distance, is_between, is_out
 from lib.player import PlayerList
@@ -13,6 +13,8 @@ from lib.client import Client
 def main():
     server_ip = input("Server Ip: ")
     server_port = int(input("Server Port: "))
+    print("Precione 'R' para habilitar/desabilitar movimentos aleatorios")
+    ran = True
     client = Client(server_ip, server_port)
     dados = client.connect()
     if dados is None:
@@ -35,7 +37,10 @@ def main():
         if dados is None:
             print('Falha a se conectar com o servidor. Verifique as configurações')
             DONE = True
-        CLOCK.tick(dados['tick'])
+        try:
+            CLOCK.tick(dados['tick'])
+        except:
+            continue
         for event in pygame.event.get(): # User did something
             if event.type == pygame.QUIT: # If user clicked close
                 DONE = True # Flag that we are DONE so we exit this loop
@@ -48,6 +53,12 @@ def main():
                     player_direction = 's'
                 if event.key == pygame.K_d:
                     player_direction = 'e'
+                if event.key == pygame.K_r:
+                    ran = not ran
+        #Se os movimentos aleatorios estiver ativado
+        if ran:
+            if random_boleam(0.90):
+                player_direction = random_snake_direction()
         # Clear the SCREEN and set the SCREEN background
         SCREEN.fill(BLACK)
         #Check if PLAYER is out of the map
@@ -55,9 +66,13 @@ def main():
         #Draw Food
         for food in dados['food']:
             pygame.draw.circle(SCREEN, food['color'], (food['x'], food['y']), 3, 0)
-        print(dados['you'])
         #Draw You
-        player = dados['you']
+        try:
+            player = dados['you']
+        except KeyError:
+            print("Você Morreu")
+            DONE = True
+            continue
         joints = player['snake']['joints']
         for i in range(len(joints) - 1):
             pygame.draw.line(SCREEN, player['snake']['color'], joints[i], joints[i + 1], 2)

@@ -30,10 +30,9 @@ class PytronHandler(socketserver.BaseRequestHandler):
                 self.newplayer(data)
             else:
                 self.responseplayer(data)
-            LOCK.release()
         except KeyError:
             self.request[1].sendto("BAD REQUEST".encode('utf-8'), self.client_address)
-
+        LOCK.release()
     def newplayer(self, data):
         global PLAYERS
         data["id"] = PLAYERS.spawn()
@@ -140,6 +139,33 @@ class GameThread(Thread):
         pygame.quit()
         return
 
+class AdminThread(Thread):
+    def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, *, daemon=True):
+        super().__init__()
+        self.done = False
+
+    def run(self):
+        global PLAYERS, LOCK
+        while(not self.done):
+            op = input("1 - Listar jogadores\n2 - Matar jogador\n")
+            if op == "1":
+                LOCK.acquire()
+                for player in PLAYERS:
+                    print("Player id: {}, size: {}, color{}".format(player.ident, player.snake.size, player.snake.color))
+                LOCK.release()
+            if op == "2":
+                LOCK.acquire()
+                try:
+                    ident = int(input("Digite o Player Id: "))
+                    for player in PLAYERS:
+                        if player.ident == ident:
+                            player.snake.die()         
+                except ValueError:
+                    print('Id invalido.')
+                LOCK.release()
+    def stop(self):
+        self.done = True
+
 def main():
     global PLAYERS, TICK, SIZE
     print("Set server settings:")
@@ -152,10 +178,13 @@ def main():
     port = int(input("port: "))
     gt = GameThread(size=SIZE, tick=TICK, daemon=True)
     st = ServerThread(ip=ip, port=port, daemon=True)
+    at = AdminThread()
     gt.start()
     st.start()
+    at.start()
     gt.join()
     st.stop()
+    at.stop()
     return
 
 if __name__ == "__main__":

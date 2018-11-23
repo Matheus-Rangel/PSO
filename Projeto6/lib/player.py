@@ -14,7 +14,7 @@ class Player():
         Convert Player atributes to a dictionary
         """
         return {"snake" : self.snake.to_dict(), "ident": self.ident}
-
+        
 class PlayerList(list):
     """
     List with players objects
